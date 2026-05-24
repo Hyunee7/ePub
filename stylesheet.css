@@ -1,0 +1,22 @@
+/*
+@font-face { font-family:uf_default; src: url(res:///mnt/MOVIFAT/font/malgun.ttf); }
+@font-face { font-family:uf_chapter1; src: url(res:///mnt/MOVIFAT/font/malgun.ttf); }
+@font-face { font-family:uf_chapter2; src: url(res:///mnt/MOVIFAT/font/malgun.ttf); }
+@font-face { font-family:uf_chapter3; src: url(res:///mnt/MOVIFAT/font/malgun.ttf); }
+@font-face { font-family:uf_title; src: url(res:///mnt/MOVIFAT/font/malgun.ttf); }
+@font-face { font-family:uf_author; src: url(res:///mnt/MOVIFAT/font/malgun.ttf); }
+*/
+body { font-family:uf_default; margin:0%; padding:0%; }
+body.book { font-family:uf_default; font-size:1.0em;line-height:1.4em;margin: 0%; margin-left:0.5%;margin-right:4%;padding: 0%; text-align: justify; }
+div.book { text-align: justify; }
+div.toc { margin-left: 3%; text-align: left; }
+p { text-indent:0.5em;margin-top:0.0em;margin-bottom:0.4em;}
+div.title_box { margin-top: 1em; margin-bottom: 0; border-bottom: 1px solid black; }
+div.title_box1 { margin-top: 0; margin-bottom: 0; color:white; background-color:black; }
+pre { font-size: small; }
+.chapter1 { font-family:uf_chapter1; font-size:1.3em;line-height:1.1em; text-align:left; text-indent:0em; }
+.chapter2 { font-family:uf_chapter2; font-size:1.3em;line-height:1.1em; text-align:left; text-indent:0em; }
+.chapter3 { font-family:uf_chapter3; font-size:1.3em;line-height:1.1em; text-align:left; text-indent:0em; }
+.title { font-family:uf_title; font-size:3.0em;margin-bottom:1.0em; text-align:center; }
+.author { font-family:uf_author; font-size:2.0em;margin-top:1.0em; text-align:center; }
+.ir { float: right; margin: 5px; } .il { float: left; margin: 5px; }

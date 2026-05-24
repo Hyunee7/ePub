@@ -1,0 +1,612 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EPUB</title>
+  <script src="jszip.min.js"></script>
+  <script>
+    var params = URLSearchParams && new URLSearchParams(document.location.search.substring(1));
+    var url = params && params.get("url") && decodeURIComponent(params.get("url"));
+    var currentSectionIndex = (params && params.get("loc")) ? params.get("loc") : undefined;
+
+
+var table = {
+	"application": {
+		"ecmascript": ["es", "ecma"],
+		"javascript": "js",
+		"ogg": "ogx",
+		"pdf": "pdf",
+		"postscript": ["ps", "ai", "eps", "epsi", "epsf", "eps2", "eps3"],
+		"rdf+xml": "rdf",
+		"smil": ["smi", "smil"],
+		"xhtml+xml": ["xhtml", "xht"],
+		"xml": ["xml", "xsl", "xsd", "opf", "ncx"],
+		"zip": "zip",
+		"x-httpd-eruby": "rhtml",
+		"x-latex": "latex",
+		"x-maker": ["frm", "maker", "frame", "fm", "fb", "book", "fbdoc"],
+		"x-object": "o",
+		"x-shockwave-flash": ["swf", "swfl"],
+		"x-silverlight": "scr",
+		"epub+zip": "epub",
+		"font-tdpfr": "pfr",
+		"inkml+xml": ["ink", "inkml"],
+		"json": "json",
+		"jsonml+json": "jsonml",
+		"mathml+xml": "mathml",
+		"metalink+xml": "metalink",
+		"mp4": "mp4s",
+		// "oebps-package+xml" : "opf",
+		"omdoc+xml": "omdoc",
+		"oxps": "oxps",
+		"vnd.amazon.ebook": "azw",
+		"widget": "wgt",
+		// "x-dtbncx+xml" : "ncx",
+		"x-dtbook+xml": "dtb",
+		"x-dtbresource+xml": "res",
+		"x-font-bdf": "bdf",
+		"x-font-ghostscript": "gsf",
+		"x-font-linux-psf": "psf",
+		"x-font-otf": "otf",
+		"x-font-pcf": "pcf",
+		"x-font-snf": "snf",
+		"x-font-ttf": ["ttf", "ttc"],
+		"x-font-type1": ["pfa", "pfb", "pfm", "afm"],
+		"x-font-woff": "woff",
+		"x-mobipocket-ebook": ["prc", "mobi"],
+		"x-mspublisher": "pub",
+		"x-nzb": "nzb",
+		"x-tgif": "obj",
+		"xaml+xml": "xaml",
+		"xml-dtd": "dtd",
+		"xproc+xml": "xpl",
+		"xslt+xml": "xslt",
+		"internet-property-stream": "acx",
+		"x-compress": "z",
+		"x-compressed": "tgz",
+		"x-gzip": "gz"
+	},
+	"audio": {
+		"flac": "flac",
+		"midi": ["mid", "midi", "kar", "rmi"],
+		"mpeg": ["mpga", "mpega", "mp2", "mp3", "m4a", "mp2a", "m2a", "m3a"],
+		"mpegurl": "m3u",
+		"ogg": ["oga", "ogg", "spx"],
+		"x-aiff": ["aif", "aiff", "aifc"],
+		"x-ms-wma": "wma",
+		"x-wav": "wav",
+		"adpcm": "adp",
+		"mp4": "mp4a",
+		"webm": "weba",
+		"x-aac": "aac",
+		"x-caf": "caf",
+		"x-matroska": "mka",
+		"x-pn-realaudio-plugin": "rmp",
+		"xm": "xm",
+		"mid": ["mid", "rmi"]
+	},
+	"image": {
+		"gif": "gif",
+		"ief": "ief",
+		"jpeg": ["jpeg", "jpg", "jpe"],
+		"pcx": "pcx",
+		"png": "png",
+		"svg+xml": ["svg", "svgz"],
+		"tiff": ["tiff", "tif"],
+		"x-icon": "ico",
+		"bmp": "bmp",
+		"webp": "webp",
+		"x-pict": ["pic", "pct"],
+		"x-tga": "tga",
+		"cis-cod": "cod"
+	},
+	"text": {
+		"cache-manifest": ["manifest", "appcache"],
+		"css": "css",
+		"csv": "csv",
+		"html": ["html", "htm", "shtml", "stm"],
+		"mathml": "mml",
+		"plain": ["txt", "text", "brf", "conf", "def", "list", "log", "in", "bas"],
+		"richtext": "rtx",
+		"tab-separated-values": "tsv",
+		"x-bibtex": "bib"
+	},
+	"video": {
+		"mpeg": ["mpeg", "mpg", "mpe", "m1v", "m2v", "mp2", "mpa", "mpv2"],
+		"mp4": ["mp4", "mp4v", "mpg4"],
+		"quicktime": ["qt", "mov"],
+		"ogg": "ogv",
+		"vnd.mpegurl": ["mxu", "m4u"],
+		"x-flv": "flv",
+		"x-la-asf": ["lsf", "lsx"],
+		"x-mng": "mng",
+		"x-ms-asf": ["asf", "asx", "asr"],
+		"x-ms-wm": "wm",
+		"x-ms-wmv": "wmv",
+		"x-ms-wmx": "wmx",
+		"x-ms-wvx": "wvx",
+		"x-msvideo": "avi",
+		"x-sgi-movie": "movie",
+		"x-matroska": ["mpv", "mkv", "mk3d", "mks"],
+		"3gpp2": "3g2",
+		"h261": "h261",
+		"h263": "h263",
+		"h264": "h264",
+		"jpeg": "jpgv",
+		"jpm": ["jpm", "jpgm"],
+		"mj2": ["mj2", "mjp2"],
+		"vnd.ms-playready.media.pyv": "pyv",
+		"vnd.uvvu.mp4": ["uvu", "uvvu"],
+		"vnd.vivo": "viv",
+		"webm": "webm",
+		"x-f4v": "f4v",
+		"x-m4v": "m4v",
+		"x-ms-vob": "vob",
+		"x-smv": "smv"
+	}
+};
+
+var mimeTypes = function () {
+	var type,
+	    subtype,
+	    val,
+	    index,
+	    mimeTypes = {};
+	for (type in table) {
+		if (table.hasOwnProperty(type)) {
+			for (subtype in table[type]) {
+				if (table[type].hasOwnProperty(subtype)) {
+					val = table[type][subtype];
+					if (typeof val == "string") {
+						mimeTypes[val] = type + "/" + subtype;
+					} else {
+						for (index = 0; index < val.length; index++) {
+							mimeTypes[val[index]] = type + "/" + subtype;
+						}
+					}
+				}
+			}
+		}
+	}
+	return mimeTypes;
+}();
+
+var defaultValue = "text/plain"; //"application/octet-stream";
+
+function lookup(filename) {
+	return filename && mimeTypes[filename.split(".").pop().toLowerCase()] || defaultValue;
+};
+
+
+/**
+ * Parse xml (or html) markup
+ * @param {string} markup
+ * @param {string} mime
+ * @param {boolean} forceXMLDom force using xmlDom to parse instead of native parser
+ * @returns {document} document
+ * @memberof Core
+ */
+function parse(markup, mime, forceXMLDom) {
+	var doc;
+	var Parser;
+
+	if (typeof DOMParser === "undefined" || forceXMLDom) {
+		Parser = __webpack_require__(16).DOMParser;
+	} else {
+		Parser = DOMParser;
+	}
+
+	// Remove byte order mark before parsing
+	// https://www.w3.org/International/questions/qa-byte-order-mark
+	if (markup.charCodeAt(0) === 0xFEFF) {
+		markup = markup.slice(1);
+	}
+
+	doc = new Parser().parseFromString(markup, mime);
+
+	return doc;
+}
+
+/**
+ * querySelector polyfill
+ * @param {element} el
+ * @param {string} sel selector string
+ * @returns {element} element
+ * @memberof Core
+ */
+function qs(el, sel) {
+	var elements;
+	if (!el) {
+		throw new Error("No Element Provided");
+	}
+
+	if (typeof el.querySelector != "undefined") {
+		return el.querySelector(sel);
+	} else {
+		elements = el.getElementsByTagName(sel);
+		if (elements.length) {
+			return elements[0];
+		}
+	}
+}
+
+/**
+ * querySelectorAll polyfill
+ * @param {element} el
+ * @param {string} sel selector string
+ * @returns {element[]} elements
+ * @memberof Core
+ */
+function qsa(el, sel) {
+
+	if (typeof el.querySelector != "undefined") {
+		return el.querySelectorAll(sel);
+	} else {
+		return el.getElementsByTagName(sel);
+	}
+}
+
+/**
+ * querySelector by property
+ * @param {element} el
+ * @param {string} sel selector string
+ * @param {props[]} props
+ * @returns {element[]} elements
+ * @memberof Core
+ */
+function qsp(el, sel, props) {
+	var q, filtered;
+	if (typeof el.querySelector != "undefined") {
+		sel += "[";
+		for (var prop in props) {
+			sel += prop + "~='" + props[prop] + "'";
+		}
+		sel += "]";
+		return el.querySelector(sel);
+	} else {
+		q = el.getElementsByTagName(sel);
+		filtered = Array.prototype.slice.call(q, 0).filter(function (el) {
+			for (var prop in props) {
+				if (el.getAttribute(prop) === props[prop]) {
+					return true;
+				}
+			}
+			return false;
+		});
+
+		if (filtered) {
+			return filtered[0];
+		}
+	}
+}
+
+
+
+
+function assertPath(path) {
+  if (typeof path !== 'string') {
+    throw new TypeError('Path must be a string. Received ' + path);
+  }
+}
+
+  function dirname(path) {
+    assertPath(path);
+    if (path.length === 0)
+      return '.';
+    var code = path.charCodeAt(0);
+    var hasRoot = (code === 47/*/*/);
+    var end = -1;
+    var matchedSlash = true;
+    for (var i = path.length - 1; i >= 1; --i) {
+      code = path.charCodeAt(i);
+      if (code === 47/*/*/) {
+        if (!matchedSlash) {
+          end = i;
+          break;
+        }
+      } else {
+        // We saw the first non-path separator
+        matchedSlash = false;
+      }
+    }
+
+    if (end === -1)
+      return hasRoot ? '/' : '.';
+    if (hasRoot && end === 1)
+      return '//';
+    return path.slice(0, end);
+  }
+
+    function getElementText(xml, tag) {
+        var found = xml.getElementsByTagNameNS("http://purl.org/dc/elements/1.1/", tag);
+        var el;
+
+        if (!found || found.length === 0) return "";
+
+        el = found[0];
+
+        if (el.childNodes.length) {
+            return el.childNodes[0].nodeValue;
+        }
+
+        return "";
+    }
+
+    function ncxItem(item) {
+        var id = item.getAttribute("id") || false,
+            content = (0, qs)(item, "content"),
+            src = content.getAttribute("src"),
+            navLabel = (0, qs)(item, "navLabel"),
+            text = navLabel.textContent ? navLabel.textContent : "",
+            subitems = [],
+            parentNode = item.parentNode,
+            parent;
+
+        if (parentNode && parentNode.nodeName === "navPoint") {
+            parent = parentNode.getAttribute("id");
+        }
+
+        return {
+            "id": id,
+            "href": src,
+            "label": text,
+            "subitems": subitems,
+            "parent": parent
+        };
+    }
+
+    function viewer(){
+//        navSel
+        package.spine.forEach( (item)=>{
+            navSel.add( new Option(item.idref, item.idref) );
+        } );
+        navSel.onchange();
+    }
+  </script>
+  <style>
+    #navDiv {
+        position:fixed;
+        text-align:right;
+        width:100%;
+    }
+    #viewDiv {
+        top:100px;
+    }
+  </style>
+</head>
+<body>
+<div>
+<div id=navDiv><select align=right id=navSel></select></div>
+<div>&nbsp;</div>
+<div id=viewDiv></div>
+</div>
+<script>
+
+var CONTAINER_PATH = "META-INF/container.xml";  // start file
+var directory; // ePub root directory
+//var container;
+//var packagePath;
+var package;
+var navigation;
+var doc;
+
+//var Parser = DOMParser;
+
+var xhr = new XMLHttpRequest();
+
+//url = 'https://s3.amazonaws.com/moby-dick/moby-dick.epub';
+//url = '/[A-Z]/The Adventures of Sherlock Holmes.epub';
+//url = '/%5B%EA%B9%80%EC%9A%A9%5D/%5B%EA%B9%80%EC%9A%A9%5D%20%EC%86%8C%EC%98%A4%EA%B0%95%ED%98%B8.epub';
+
+xhr.open('GET', url || 'doryongki.epub', true);
+
+xhr.responseType = 'arraybuffer';
+xhr.withCredentials = true;
+xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest'); xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+
+// Process the response when the request is ready.
+xhr.onload = function(e) {
+  if (this.status == 200) {
+    // Create a binary string from the returned data, then encode it as a data URL.
+    //console.log(this.response);
+    var uInt8Array = new Uint8Array(this.response);
+    var i = uInt8Array.length;
+    var binaryString = new Array(i);
+    while (i--)
+    {
+      binaryString[i] = String.fromCharCode(uInt8Array[i]);
+    }
+    var data = binaryString.join('');
+    var base64 = window.btoa(data);
+//    console.log(base64);
+    new_zip = new JSZip();
+//    zip = new_zip.loadAsync(data);
+//    console.log(contents);
+    new_zip.loadAsync(data).then( (zip)=>{
+        //console.log(zip.files);
+        // mimetype : application/epub+zip 확인 
+        //new_zip.file('mimetype').async('string').then( (c)=>{console.log('mimetype:', c)} )
+
+        // container read
+        new_zip.file(CONTAINER_PATH).async('string').then( (c)=>{
+            //console.log(CONTAINER_PATH,':', c)
+            //var doc = new Parser().parseFromString(c, lookup(CONTAINER_PATH));
+            var doc = parse(c, lookup(CONTAINER_PATH));
+            //console.log(CONTAINER_PATH, doc);
+            var rootfile = (0, qs)(doc, "rootfile");
+            var packagePath = rootfile.getAttribute("full-path");
+            directory = dirname(packagePath);
+            var encoding = doc.xmlEncoding;
+            //console.log('packagePath', packagePath, directory, encoding, lookup(packagePath));
+
+            // package read (content.opf)
+            new_zip.file(packagePath).async('string').then( (p)=>{
+                //console.log(packagePath, p)
+                 doc = parse(p, lookup(packagePath));
+                //package = doc;
+
+                //var metadataNode = qs(doc,'metadata');
+                //console.log('metadataNode',metadataNode)
+                var metadata = {};
+                var dcs = qs(doc,'metadata')
+                         .getElementsByTagNameNS("http://purl.org/dc/elements/1.1/", '*');
+                for (var i=0; i<dcs.length; i++) {
+                    //console.log(i, dcs[i].tagName.replace('dc:',''), dcs[i].innerHTML);
+                    metadata[dcs[i].tagName.replace('dc:','')] = dcs[i].innerHTML;
+                }
+                //console.log('metadata',metadata);
+
+                var manifest = {}
+                qsa(qs(doc,'manifest'), 'item').forEach( (item)=>{
+                    var id = item.getAttribute("id"),
+                        href = item.getAttribute("href") || "",
+                        type = item.getAttribute("media-type") || "",
+                        properties = item.getAttribute("properties") || "";
+
+                    manifest[id] = {
+                        "href": href,
+                        // "url" : href,
+                        "type": type,
+                        "properties": properties.length ? properties.split(" ") : []
+                    };
+                } );
+                //console.log('manifest',manifest)
+
+                var spine = [];
+//                console.log('toc',qs(doc,'spine').getAttribute("toc"));
+                qsa(qs(doc,'spine'), "itemref").forEach( (item, index)=>{
+                    var idref = item.getAttribute("idref");
+                    // var cfiBase = epubcfi.generateChapterComponent(spineNodeIndex, index, Id);
+                    var props = item.getAttribute("properties") || "";
+                    var propArray = props.length ? props.split(" ") : [];
+                    // var manifestProps = manifest[Id].properties;
+                    // var manifestPropArray = manifestProps.length ? manifestProps.split(" ") : [];
+
+                    var itemref = {
+                        "idref": idref,
+                        "linear": item.getAttribute("linear") || "yes",
+                        "properties": propArray,
+                        // "href" : manifest[Id].href,
+                        // "url" :  manifest[Id].url,
+                        "index": index
+                        // "cfiBase" : cfiBase
+                    };
+                    spine.push(itemref);
+                } );
+                //console.log('spine',spine)
+
+                package = {metadata:metadata, manifest:manifest, spine:spine, curIndex:0};
+                console.log('package',package);
+                viewer();
+
+                // 목차정보 (toc.ncx)
+                try {
+                    var tocId = qs(doc,'spine').getAttribute("toc");
+                    var node = qs(doc,'manifest').querySelector("item[id='" + tocId + "']");
+                    var file = node.getAttribute("href");
+                    //console.log('file',file);
+                    new_zip.file(directory + '/' + file).async('string').then( (n)=>{
+                        //console.log(n);
+                        var doc = parse(n, lookup('xml'));
+                        var navPoints = (0, qsa)(doc, "navPoint");
+                        var length = navPoints.length;
+                        var i;
+                        var toc = {};
+                        var list = [];
+                        var item, parent;
+
+                        if (!navPoints || length === 0) return list;
+
+                        for (i = 0; i < length; ++i) {
+                            item = ncxItem(navPoints[i]);
+                            toc[item.id] = item;
+                            if (!item.parent) {
+                                list.push(item);
+                            } else {
+                                parent = toc[item.parent];
+                                parent.subitems.push(item);
+                            }
+                        }
+
+                        //console.log( list );
+                        var navPath = directory + '/' + list[0].href;
+                        new_zip.file(navPath).async('string').then( (n)=>{
+                            //console.log('list',navPath,n);
+                        } );
+
+                    } );
+                } catch(err) {
+                    console.log(err);
+                }
+
+            } );
+/*
+            // OEBPS/stylesheet.css
+            new_zip.file('OEBPS/stylesheet.css').async('string').then( (p)=>{
+                //console.log('OEBPS/stylesheet.css', p)
+            } );
+            // OEBPS/chapter1.xhtml
+            var path = 'OEBPS/chapter1.xhtml';
+            new_zip.file(path).async('string').then( (p)=>{
+                //console.log(path, p)
+                view.innerHTML = p;
+                
+            } );
+            // 
+            var navigationPath = 'OEBPS/toc.ncx';
+            new_zip.file(navigationPath).async('string').then( (p)=>{
+                console.log(navigationPath, p)
+                
+            } );
+*/
+        } );
+
+        //content = new_zip.file('OEBPS/content.opf').async("string");
+        /*
+        let mimeType = lookup('OEBPS/content.opf');
+        content = new_zip.file('OEBPS/content.opf').async("uint8array").then(function (uint8array) {
+            return new Blob([uint8array], { type: mimeType });
+        });
+        */
+    } );
+
+  }
+};
+
+xhr.send();
+
+//const zip = new JSZIP();
+//const zip = new JSZip();
+//			var fileRes = await fetch('doryongki.epub');
+//			var fileBlob = await fileRes.blob();
+//			zip.file('doryongki.epub', fetch('doryongki.epub').blob());
+
+var new_zip;
+var zip;
+//let content = new_zip.file('OEBPS/content.opf')
+var content;
+
+
+//function fPackge()
+navSel.onchange = (ev)=>{
+    //console.log('ev',ev, 'this',this)
+    var idref = navSel.options[navSel.options.selectedIndex].text;
+    //console.log('idref', idref);
+    var manifest = package.manifest[idref];
+    console.log('manifest', manifest);
+    new_zip.file(directory + '/' + manifest.href).async('string').then( (v)=>{
+        //console.log(v);
+        viewDiv.innerHTML = v;
+    } );
+}
+
+// 
+window.onscroll = function(){
+    //console.log(window.scrollX, window.scrollY);
+}
+</script>
+
+</body>
+</html>

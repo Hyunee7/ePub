@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EPUB</title>
+  <style>
+    body {background-color:#555555;}
+    input {
+        background-color:#666666;
+        border-width: inherit;
+        font-size:14pt;
+    }
+    button {
+        background-color:#333333;
+        color:#efefef;
+        font-size:14pt;
+    }
+    tbody tr:nth-child(odd) {
+        background-color: #444444;
+    }
+    td {
+        padding:2 0 2 0;
+    }
+    /*
+    ul {
+        display: flex;
+        flex-wrap: wrap;
+        padding: 0;
+        margin: 0;
+        list-style: none;
+    }
+    li {
+        padding: 0 5 0 5;
+        margin: 0;
+    }
+    */
+    li {
+        display: inline-block; 
+        /*font-size:12pt;*/
+    } 
+    a {
+        color:#111111;
+    }
+    #pageDiv {
+        text-align:center;
+    }
+    table {
+        width:100%;
+    }
+
+    @media (max-width: 375px) {
+        html {
+            font-size:14pt;
+        }
+    }
+
+  </style>
+  <script>
+    var csv=[];
+    window.onload = ()=>{
+        search.onkeydown = (ev)=>{
+//            console.log(ev.key);
+            if(ev.key == 'Enter') listPut(1); // 검색어 입력창에 Enter 이면 목록출력
+        }
+        //console.log(new Date().toISOString(), 'start');
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'epub.list.csv', true);
+        // Process the response when the request is ready.
+        xhr.onload = function(e) {
+          //console.log(new Date().toISOString(), 'xhr.onload');
+          if (this.status == 200) {
+            // Create a binary string from the returned data, then encode it as a data URL.
+            //console.log(new Date().toISOString(), 'forEach Start');
+            this.response.split('\r\n').forEach( (item, index)=>{
+                var line = item.split(';');
+                csv.push({ 'filename':line[0]
+                         , 'path'    :line[1]
+                         , 'name'    :line[2]
+                         , 'ext'     :line[3]
+                         , 'size'    :line[4] });
+            } );
+            //console.log(new Date().toISOString(), 'forEach end');
+            listPut(1);
+          }
+        };
+        xhr.send();
+    }
+
+    var page_num = 12;      // 한페이당 출력 목록수
+    var show_page_num = 10; // 페이지 번호 출력 개수
+    //var currentPage = 0;
+    function listPut(page){
+        //console.log(new Date().toISOString(), 'listPut Start');
+        var list = csv.filter( (el)=>{return el.filename.indexOf(search.value)>-1} );
+        //console.log(list);
+        var total = list.length;
+        var html='<table border=0 cellspacing=1>';
+        html += '<tr><th>No.</th><th>Title</th><th>Size</th></tr>';
+        var start_num=(page-1)*page_num; // 페이지 수에 따른 출력시 첫번째가 될 글의 번호 구함
+        //log('total', total);
+        //log('start_num', start_num);
+        for(var j=start_num; j<start_num+page_num; j++){
+            //log('j',j);
+            if(j>=total-1) break;
+            var itemNo = j;
+            var listNo = itemNo + 1;
+            html += '<tr>';
+            html += '<td align=center>'+ listNo +'</td>';
+            html += '<td><a href="readerm.html?url='+list[itemNo].filename+'">'+ list[itemNo].name +'</a></td>';
+            html += '<td align=right>'+ list[itemNo].size.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",") +'</td>';
+            html += '</tr>';
+        }
+        html += '</table>';
+        listDiv.innerHTML = html;
+
+//        var totalPages = Math.ceil(itemCnt/page_num);
+        var total_page=parseInt((total-1)/page_num)+1; // 전체 페이지 구함
+        //var total_page=parseInt((total-1)/page_num); // 전체 페이지 구함
+        var start_page=parseInt((page-1)/show_page_num)*show_page_num;
+        log('start_page', start_page);
+        var i=1;
+        var print_page="";
+
+
+        log('total_page', total_page);
+        html = '<ul>';
+
+        var a_1_prev_page= "";
+        var a_1_next_page= "";
+        var a_prev_page = "";
+        var a_next_page = "";
+
+        if(page>1) a_1_prev_page="<li><a href='javascript:listPut("+(page-1)+")'>이전</a>&nbsp;</li>";
+        if(page<total_page) a_1_next_page="<li>&nbsp;<a href='javascript:listPut("+(page+1)+")'>다음</a></li>";
+
+        if(page>show_page_num) {
+            prev_page=start_page;
+            a_prev_page="<li><a href='javascript:listPut("+prev_page+")'>《</a>&nbsp;</li>";
+            print_page+="<li><a href='javascript:listPut("+1+")'>1</a>&nbsp;...&nbsp;</li>";
+        }
+
+        while(i+start_page<=total_page&&i<=show_page_num) {
+            move_page=i+start_page;
+        //	if(page==move_page) print_page.=" <b>move_page</b> ";
+            if(page==move_page) print_page+="<li>"+move_page+"&nbsp;</li>";
+            else print_page+="<li><a href='javascript:listPut("+move_page+")'>"+move_page+"</a></li> ";
+            i++;
+        }
+
+        if(total_page>move_page) {
+            next_page=move_page+1;
+            a_next_page="<li>&nbsp;<a href='javascript:listPut("+next_page+")'>》</a></li>";
+            print_page+="<li>...&nbsp;<a href='javascript:listPut("+total_page+")'>"+total_page+"</a></li>";
+        }
+
+        html += a_1_prev_page + a_prev_page + print_page + a_next_page + a_1_next_page;
+
+        html += '</ul>';
+        pageDiv.innerHTML = html;
+        //console.log(new Date().toISOString(), 'listPut end');
+    }
+
+    function log(title, str){
+        console.log(new Date().toISOString(), title, str);
+    }
+  </script>
+</head>
+<body>
+<div style="text-align:right;">
+  <input type="text" name="search" id=search>
+  <button onclick="listPut(1)">검색</button>
+</div>
+<div id=listDiv></div>
+<div id=pageDiv></div>
+</body>
+</html>
